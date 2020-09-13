@@ -21,16 +21,23 @@ class FeedStoreChallengeTests: XCTestCase, FeedStoreSpecs {
     //  ***********************
     
     private class InMemoryFeedStore: FeedStore {
+        var feed: (local: [LocalFeedImage], date: Date)?
+        
         func deleteCachedFeed(completion: @escaping DeletionCompletion) {
             
         }
         
         func insert(_ feed: [LocalFeedImage], timestamp: Date, completion: @escaping InsertionCompletion) {
-            
+            self.feed = (feed, timestamp)
+            completion(nil)
         }
         
         func retrieve(completion: @escaping RetrievalCompletion) {
-            completion(.empty)
+            if let feed = self.feed {
+                completion(.found(feed: feed.local, timestamp: feed.date))
+            } else {
+                completion(.empty)
+            }
         }
     }
     
@@ -47,9 +54,9 @@ class FeedStoreChallengeTests: XCTestCase, FeedStoreSpecs {
 	}
 
 	func test_retrieve_deliversFoundValuesOnNonEmptyCache() {
-//		let sut = makeSUT()
-//
-//		assertThatRetrieveDeliversFoundValuesOnNonEmptyCache(on: sut)
+		let sut = makeSUT()
+        
+		assertThatRetrieveDeliversFoundValuesOnNonEmptyCache(on: sut)
 	}
 
 	func test_retrieve_hasNoSideEffectsOnNonEmptyCache() {
