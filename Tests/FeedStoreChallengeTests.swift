@@ -21,23 +21,30 @@ class FeedStoreChallengeTests: XCTestCase, FeedStoreSpecs {
     //  ***********************
     
     private class InMemoryFeedStore: FeedStore {
-        var feed: (local: [LocalFeedImage], date: Date)?
+        private var feed: (local: [LocalFeedImage], date: Date)?
+        private var queue = DispatchQueue(label: "\(InMemoryFeedStore.self)Queue", qos: .userInitiated, attributes: .concurrent)
         
         func deleteCachedFeed(completion: @escaping DeletionCompletion) {
-            feed = nil
-            completion(nil)
+            queue.async(flags: .barrier) {
+                self.feed = nil
+                completion(nil)
+            }
         }
         
         func insert(_ feed: [LocalFeedImage], timestamp: Date, completion: @escaping InsertionCompletion) {
-            self.feed = (feed, timestamp)
-            completion(nil)
+            queue.async(flags: .barrier) {
+                self.feed = (feed, timestamp)
+                completion(nil)
+            }
         }
         
         func retrieve(completion: @escaping RetrievalCompletion) {
-            if let feed = self.feed {
-                completion(.found(feed: feed.local, timestamp: feed.date))
-            } else {
-                completion(.empty)
+            queue.async {
+                if let feed = self.feed {
+                    completion(.found(feed: feed.local, timestamp: feed.date))
+                } else {
+                    completion(.empty)
+                }
             }
         }
     }
@@ -109,16 +116,18 @@ class FeedStoreChallengeTests: XCTestCase, FeedStoreSpecs {
 	}
 
 	func test_storeSideEffects_runSerially() {
-//		let sut = makeSUT()
-//
-//		assertThatSideEffectsRunSerially(on: sut)
+		let sut = makeSUT()
+
+		assertThatSideEffectsRunSerially(on: sut)
 	}
 	
 	// - MARK: Helpers
 	
 	private func makeSUT() -> FeedStore {
-		return InMemoryFeedStore()
-	}
+        let sut = InMemoryFeedStore()
+        
+		return sut
+ 	}
 	
 }
 
