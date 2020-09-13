@@ -20,35 +20,6 @@ class FeedStoreChallengeTests: XCTestCase, FeedStoreSpecs {
     //
     //  ***********************
     
-    private class InMemoryFeedStore: FeedStore {
-        private var feed: (local: [LocalFeedImage], date: Date)?
-        private var queue = DispatchQueue(label: "\(InMemoryFeedStore.self)Queue", qos: .userInitiated, attributes: .concurrent)
-        
-        func deleteCachedFeed(completion: @escaping DeletionCompletion) {
-            queue.async(flags: .barrier) {
-                self.feed = nil
-                completion(nil)
-            }
-        }
-        
-        func insert(_ feed: [LocalFeedImage], timestamp: Date, completion: @escaping InsertionCompletion) {
-            queue.async(flags: .barrier) {
-                self.feed = (feed, timestamp)
-                completion(nil)
-            }
-        }
-        
-        func retrieve(completion: @escaping RetrievalCompletion) {
-            queue.async {
-                if let feed = self.feed {
-                    completion(.found(feed: feed.local, timestamp: feed.date))
-                } else {
-                    completion(.empty)
-                }
-            }
-        }
-    }
-    
 	func test_retrieve_deliversEmptyOnEmptyCache() {
 		let sut = makeSUT()
 
