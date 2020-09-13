@@ -24,7 +24,8 @@ class FeedStoreChallengeTests: XCTestCase, FeedStoreSpecs {
         var feed: (local: [LocalFeedImage], date: Date)?
         
         func deleteCachedFeed(completion: @escaping DeletionCompletion) {
-            
+            feed = nil
+            completion(nil)
         }
         
         func insert(_ feed: [LocalFeedImage], timestamp: Date, completion: @escaping InsertionCompletion) {
@@ -84,9 +85,9 @@ class FeedStoreChallengeTests: XCTestCase, FeedStoreSpecs {
 	}
 
 	func test_delete_deliversNoErrorOnEmptyCache() {
-//		let sut = makeSUT()
-//
-//		assertThatDeleteDeliversNoErrorOnEmptyCache(on: sut)
+		let sut = makeSUT()
+
+		assertThatDeleteDeliversNoErrorOnEmptyCache(on: sut)
 	}
 
 	func test_delete_hasNoSideEffectsOnEmptyCache() {
