@@ -30,7 +30,7 @@ class FeedStoreChallengeTests: XCTestCase, FeedStoreSpecs {
         }
         
         func retrieve(completion: @escaping RetrievalCompletion) {
-            
+            completion(.empty)
         }
     }
     
@@ -109,7 +109,7 @@ class FeedStoreChallengeTests: XCTestCase, FeedStoreSpecs {
 	// - MARK: Helpers
 	
 	private func makeSUT() -> FeedStore {
-		
+		return InMemoryFeedStore()
 	}
 	
 }
